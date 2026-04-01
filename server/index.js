@@ -6,7 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     origin: "https://allaeth-store-frontend.onrender.com", // رابط موقعك
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST","PUT","DELETE"
+    ],
     allowedHeaders: ["Content-Type"]
 }));
 
