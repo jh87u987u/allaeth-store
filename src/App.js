@@ -13,7 +13,7 @@ function App() {
 
   // --- 2. جلب المنتجات عند تشغيل الصفحة ---
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+    fetch('https://allaeth-store-1.onrender.com')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error("السيرفر مو شغال:", err));
@@ -24,7 +24,7 @@ function App() {
     e.preventDefault();
     const productData = { name: newName, price: Number(newPrice), image: newImage };
 
-    fetch('http://localhost:5000/api/products', {
+    fetch('http:calhost:5000/api/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)

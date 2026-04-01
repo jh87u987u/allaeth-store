@@ -9,7 +9,7 @@ function Admin() {
         e.preventDefault();
         const newProduct = { name, price: Number(price), image };
 
-        fetch('http://localhost:5000/api/products', {
+        fetch('https://allaeth-store-1.onrender.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newProduct)
