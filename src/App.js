@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 
 function App() {
   // --- 1. الحالات (States) ---
+const [isManager, setIsManager] = useState(false);
+
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState([]);
+  
 
   // حالات لوحة التحكم (Admin States)
+  
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newImage, setNewImage] = useState('');
@@ -67,18 +71,34 @@ function App() {
         />
       </header>
 
-      {/* لوحة التحكم (Admin Section) */}
-      <div style={{ backgroundColor: '#fff', padding: '20px', margin: '20px auto', borderRadius: '15px', maxWidth: '800px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ color: '#2980b9' }}>🛠️ لوحة تحكم المدير (إضافة بضاعة جديدة)</h3>
-        <form onSubmit={handleAddProduct} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <input type="text" placeholder="اسم المنتج" value={newName} onChange={e => setNewName(e.target.value)} required style={inputStyle} />
-          <input type="number" placeholder="السعر" value={newPrice} onChange={e => setNewPrice(e.target.value)} required style={inputStyle} />
-          <input type="text" placeholder="رابط الصورة" value={newImage} onChange={e => setNewImage(e.target.value)} style={inputStyle} />
-          <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
-            أضف للمحل ✅
+{/* لوحة التحكم المحمية */}
+      {!isManager ? (
+        <div style={{ textAlign: 'center', margin: '20px' }}>
+          <button 
+            onClick={() => {
+              const pass = prompt("أدخل كود المدير:");
+              if (pass === "allaeth123") setIsManager(true);
+              else alert("كود خطأ!");
+            }}
+            style={{ padding: '10px 20px', cursor: 'pointer', backgroundColor: '#2980b9', color: 'white', border: 'none', borderRadius: '5px' }}
+          >
+            دخول لوحة الإدارة 🔐
           </button>
-        </form>
-      </div>
+        </div>
+      ) : (
+        <div style={{ backgroundColor: '#fff', padding: '20px', margin: '20px auto', borderRadius: '15px', maxWidth: '800px' }}>
+          <h3 style={{ color: '#2980b9' }}>🛠️ إضافة بضاعة جديدة (لوحة المدير)</h3>
+          <form onSubmit={handleAddProduct} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <input type="text" placeholder="اسم المنتج" value={newName} onChange={(e) => setNewName(e.target.value)} required />
+            <input type="number" placeholder="السعر" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
+            <input type="text" placeholder="رابط الصورة" value={newImage} onChange={(e) => setNewImage(e.target.value)} required />
+            <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>
+              أضف للمحل ✅
+            </button>
+            <button onClick={() => setIsManager(false)} style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px' }}>خروج</button>
+          </form>
+        </div>
+      )}
 
       <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
         {/* عرض المنتجات */}
