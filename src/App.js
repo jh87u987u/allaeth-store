@@ -24,7 +24,7 @@ function App() {
     e.preventDefault();
     const productData = { name: newName, price: Number(newPrice), image: newImage };
 
-    fetch('http:calhost:5000/api/products', {
+    fetch('https://allaeth-store-1.onrender.com/api/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(productData)
