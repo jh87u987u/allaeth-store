@@ -10,6 +10,7 @@ function App() {
   // حالات لوحة التحكم (Admin States)
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [newImage, setNewImage] = useState('');
 
   const API_URL = 'https://allaeth-store-1.onrender.com/api/products';
 
@@ -22,34 +23,20 @@ function App() {
   }, []);
 
   // --- 3. وظائف لوحة التحكم (إضافة، حذف، تعديل) ---
-  
-  // دالة إضافة منتج مع رفع صورة (File Upload)
   const handleAddProduct = (e) => {
     e.preventDefault();
-    
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput.files.length === 0) {
-      alert("الرجاء اختيار صورة للمنتج!");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('name', newName);
-    formData.append('price', newPrice);
-    formData.append('image', fileInput.files[0]); // إرسال الملف الفعلي
+    const productData = { name: newName, price: Number(newPrice), image: newImage };
 
     fetch(API_URL, {
       method: 'POST',
-      // ملاحظة: لا نضع Headers هنا، المتصفح سيتعرف على FormData تلقائياً
-      body: formData 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData)
     })
       .then(res => res.json())
       .then(addedProduct => {
         setProducts([...products, addedProduct]); 
-        setNewName(''); 
-        setNewPrice(''); 
-        fileInput.value = ""; // تفريغ خانة الملف بعد النجاح
-        alert("تمت الإضافة ورفع الصورة بنجاح! 🚀");
+        setNewName(''); setNewPrice(''); setNewImage(''); 
+        alert("تمت الإضافة بنجاح يا وحش! 🔥");
       })
       .catch(err => alert("فشل الاتصال بالسيرفر!"));
   };
@@ -124,20 +111,16 @@ function App() {
           </button>
         </div>
       ) : (
-        <div style={{ backgroundColor: '#fff', padding: '20px', margin: '20px auto', borderRadius: '15px', maxWidth: '800px', border: '2px solid #2980b9' }}>
-          <h3 style={{ color: '#2980b9' }}>🛠️ إضافة بضاعة جديدة (تحميل صورة من الجهاز)</h3>
+        <div style={{ backgroundColor: '#fff', padding: '20px', margin: '20px auto', borderRadius: '15px', maxWidth: '800px' }}>
+          <h3 style={{ color: '#2980b9' }}>🛠️ إضافة بضاعة جديدة (لوحة المدير)</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <input type="text" placeholder="اسم المنتج" value={newName} onChange={(e) => setNewName(e.target.value)} required />
             <input type="number" placeholder="السعر" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
-            
-            {/* التعديل هنا: اختيار ملف بدل رابط نصي */}
-            <label style={{ fontSize: '12px', color: '#666' }}>اختر صورة المنتج:</label>
-            <input type="file" id="fileInput" accept="image/*" required />
-            
-            <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer', borderRadius: '5px' }}>
-              رفع المنتج ✅
+            <input type="text" placeholder="رابط الصورة" value={newImage} onChange={(e) => setNewImage(e.target.value)} required />
+            <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>
+              أضف للمحل ✅
             </button>
-            <button onClick={() => setIsManager(false)} style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px', borderRadius: '5px', cursor: 'pointer' }}>إغلاق</button>
+            <button onClick={() => setIsManager(false)} style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px' }}>خروج</button>
           </form>
         </div>
       )}
@@ -146,27 +129,23 @@ function App() {
         <div style={{ flex: 3, display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
           {filteredProducts.map(product => (
             <div key={product.id} style={cardStyle}>
-              {/* ملاحظة: إذا كان السيرفر يرسل مسار الصورة، قد تحتاج لإضافة رابط السيرفر قبل المسار */}
-              <img 
-                src={product.image.startsWith('http') ? product.image : `https://allaeth-store-1.onrender.com${product.image}`} 
-                alt={product.name} 
-                style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '5px' }} 
-              />
+              <img src={product.image || 'https://via.placeholder.com/150'} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
               <h3>{product.name}</h3>
               <p style={{ color: '#27ae60', fontWeight: 'bold' }}>{product.price} ليرة</p>
-              <button onClick={() => addToCart(product)} style={btnStyle}>عبي بالسلة 🛒</button>
+              <button onClick={() => addToCart(product)} style={btnStyle}>عبي بلسلة</button>
               
+              {/* أزرار الإدارة للمدير فقط */}
               {isManager && (
                 <div style={{ marginTop: '10px', display: 'flex', gap: '5px' }}>
-                  <button onClick={() => handleEditPrice(product.id)} style={{ flex: 1, backgroundColor: 'orange', border: 'none', borderRadius: '3px', cursor: 'pointer', padding: '5px' }}>تعديل</button>
-                  <button onClick={() => handleDelete(product.id)} style={{ flex: 1, backgroundColor: 'red', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', padding: '5px' }}>حذف</button>
+                  <button onClick={() => handleEditPrice(product.id)} style={{ flex: 1, backgroundColor: 'orange', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>تعديل</button>
+                  <button onClick={() => handleDelete(product.id)} style={{ flex: 1, backgroundColor: 'red', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>حذف</button>
                 </div>
               )}
             </div>
           ))}
         </div>
 
-        <div style={{ flex: 1, minWidth: '250px', backgroundColor: 'white', padding: '15px', borderRadius: '10px', height: 'fit-content', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+        <div style={{ flex: 1, minWidth: '250px', backgroundColor: 'white', padding: '15px', borderRadius: '10px', height: 'fit-content' }}>
           <h2>🛒 السلة ({cart.length})</h2>
           {cart.map((item, index) => (
             <div key={index} style={{ borderBottom: '1px solid #eee', padding: '5px 0', display: 'flex', justifyContent: 'space-between' }}>
@@ -174,7 +153,6 @@ function App() {
               <button onClick={() => removeFromCart(index)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>حذف</button>
             </div>
           ))}
-          <hr />
           <h3>الإجمالي: {totalPrice} ليرة</h3>
         </div>
       </div>
