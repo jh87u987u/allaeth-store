@@ -10,7 +10,7 @@ function App() {
   // حالات لوحة التحكم (Admin States)
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  const [newImage, setNewImage] = useState('');
+  // ملاحظة: الغينا حالة newImage لأننا سنستخدم الملف مباشرة من Input
 
   const API_URL = 'https://allaeth-store-1.onrender.com/api/products';
 
@@ -25,17 +25,25 @@ function App() {
   // --- 3. وظائف لوحة التحكم (إضافة، حذف، تعديل) ---
   const handleAddProduct = (e) => {
     e.preventDefault();
-    const productData = { name: newName, price: Number(newPrice), image: newImage };
+    
+    // استخدام FormData لرفع الصورة والبيانات
+    const formData = new FormData();
+    formData.append('name', newName);
+    formData.append('price', newPrice);
+    const fileInput = document.getElementById('fileInput');
+    formData.append('image', fileInput.files[0]);
 
     fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData)
+        method: 'POST',
+        // ملاحظة: عند استخدام FormData لا نضع Content-Type يدوياً
+        body: formData 
     })
       .then(res => res.json())
       .then(addedProduct => {
         setProducts([...products, addedProduct]); 
-        setNewName(''); setNewPrice(''); setNewImage(''); 
+        setNewName(''); 
+        setNewPrice(''); 
+        fileInput.value = ''; // تنظيف خانة الملف
         alert("تمت الإضافة بنجاح يا وحش! 🔥");
       })
       .catch(err => alert("فشل الاتصال بالسيرفر!"));
@@ -116,7 +124,10 @@ function App() {
           <form onSubmit={handleAddProduct} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <input type="text" placeholder="اسم المنتج" value={newName} onChange={(e) => setNewName(e.target.value)} required />
             <input type="number" placeholder="السعر" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
-            <input type="text" placeholder="رابط الصورة" value={newImage} onChange={(e) => setNewImage(e.target.value)} required />
+            
+            {/* التعديل هنا: استخدام file input بدلاً من text input */}
+            <input type="file" id="fileInput" accept="image/*" required style={{ padding: '5px' }} />
+            
             <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>
               أضف للمحل ✅
             </button>
@@ -129,7 +140,12 @@ function App() {
         <div style={{ flex: 3, display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
           {filteredProducts.map(product => (
             <div key={product.id} style={cardStyle}>
-              <img src={product.image || 'https://via.placeholder.com/150'} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+              {/* عرض الصورة: يدعم الروابط الخارجية والصور المرفوعة من السيرفر */}
+              <img 
+                src={product.image && product.image.startsWith('http') ? product.image : `https://allaeth-store-1.onrender.com${product.image}`} 
+                alt={product.name} 
+                style={{ width: '100%', height: '150px', objectFit: 'cover' }} 
+              />
               <h3>{product.name}</h3>
               <p style={{ color: '#27ae60', fontWeight: 'bold' }}>{product.price} ليرة</p>
               <button onClick={() => addToCart(product)} style={btnStyle}>عبي بلسلة</button>
