@@ -11,7 +11,7 @@ app.use(cors({
 }));
 
 // قائمة منتجات تجريبية نضعها في قاعدة البيانات أو نرسلها مباشرة
-const products = [
+let products = [
     { id: 1, name: 'سماعات محيطية', price: 250 },
     { id: 2, name: 'ماوس جيمنج', price: 120 },
     { id: 3, name: 'كيبورد ميكانيكي', price: 350 }
@@ -31,6 +31,30 @@ app.post('/api/products', (req, res) => {
     res.json(newProduct);
 });
     res.json(products);
+});
+
+// 1. رابط حذف منتج (Delete)
+app.delete('/api/products/:id', (req, res) => {
+    const { id } = req.params;
+    // نقوم بتصفية المصفوفة وحذف المنتج الذي يحمل هذا الرقم
+    products = products.filter(p => p.id !== parseInt(id));
+    res.json({ message: "تم الحذف بنجاح" });
+});
+
+// 2. رابط تعديل السعر (Update)
+app.put('/api/products/:id', (req, res) => {
+    const { id } = req.params;
+    const { newPrice } = req.body;
+    
+    // البحث عن المنتج لتعديله
+    const product = products.find(p => p.id === parseInt(id));
+    
+    if (product) {
+        product.price = Number(newPrice);
+        res.json(product);
+    } else {
+        res.status(404).json({ message: "المنتج غير موجود" });
+    }
 });
 
 const PORT = 5000;

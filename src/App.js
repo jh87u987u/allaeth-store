@@ -1,137 +1,136 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  // --- 1. الحالات (States) ---
-const [isManager, setIsManager] = useState(false);
-
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState([]);
   
-
   // حالات لوحة التحكم (Admin States)
-  
+  const [isManager, setIsManager] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newImage, setNewImage] = useState('');
 
-  // --- 2. جلب المنتجات عند تشغيل الصفحة ---
+  const SERVER_URL = 'https://allaeth-store-1.onrender.com/api/products';
+
+  // 1. جلب المنتجات عند تشغيل الصفحة
   useEffect(() => {
-    fetch('https://allaeth-store-1.onrender.com/api/products')
+    fetch(SERVER_URL)
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error("السيرفر مو شغال:", err));
   }, []);
 
-  // --- 3. وظائف لوحة التحكم (إضافة منتج) ---
+  // 2. وظيفة إضافة منتج
   const handleAddProduct = (e) => {
     e.preventDefault();
     const productData = { name: newName, price: Number(newPrice), image: newImage };
 
-    fetch('https://allaeth-store-1.onrender.com/api/products', {
+    fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData)
+      body: JSON.stringify(productData),
     })
       .then(res => res.json())
       .then(addedProduct => {
-        setProducts([...products, addedProduct]); // تحديث القائمة فوراً
-        setNewName(''); setNewPrice(''); setNewImage(''); // تنظيف الخانات
-        alert("تمت الإضافة بنجاح يا وحش! 🔥");
+        setProducts([...products, addedProduct]);
+        setNewName(''); setNewPrice(''); setNewImage('');
+        alert("🔥 تمت الإضافة بنجاح يا وحش!");
       })
-      .catch(err => alert("فشل الاتصال بالسيرفر!"));
+      .catch(err => alert("فشل في الإضافة!"));
   };
 
-  // --- 4. وظائف السلة والبحث ---
-  const addToCart = (product) => setCart([...cart, product]);
-  
-  const removeFromCart = (index) => {
-    const newCart = cart.filter((_, i) => i !== index);
-    setCart(newCart);
+  // 3. وظيفة حذف منتج
+  const handleDelete = (id) => {
+    if (window.confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+      fetch(`${SERVER_URL}/${id}`, { method: 'DELETE' })
+        .then(() => {
+          setProducts(products.filter(p => p.id !== id));
+        })
+        .catch(err => alert("فشل الحذف!"));
+    }
   };
+
+  // 4. وظيفة تعديل السعر
+  const handleEditPrice = (id) => {
+    const newPriceValue = prompt("أدخل السعر الجديد:");
+    if (newPriceValue) {
+      fetch(`${SERVER_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPrice: Number(newPriceValue) }),
+      })
+        .then(res => res.json())
+        .then(updatedProduct => {
+          setProducts(products.map(p => (p.id === id ? updatedProduct : p)));
+        })
+        .catch(err => alert("فشل التعديل!"));
+    }
+  };
+
+  const addToCart = (product) => setCart([...cart, product]);
 
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
-
-  // --- 5. واجهة المستخدم (UI) ---
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', direction: 'rtl', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
-      
-      {/* الهيدر */}
-      <header style={{ backgroundColor: '#2c3e50', color: 'white', padding: '20px', textAlign: 'center' }}>
-        <h1>🛒 متجر Allaeth المطور</h1>
-        <input 
-          type="text" 
-          placeholder="دور على غرضك..." 
-          style={{ padding: '10px', width: '300px', borderRadius: '20px', border: 'none' }}
+    <div style={{ fontFamily: 'Arial', direction: 'rtl', padding: '20px', backgroundColor: '#f4f4f9', minHeight: '100vh' }}>
+      <header style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <h1>🏪 محل الليث ستور</h1>
+        <input
+          type="text"
+          placeholder="بحث عن منتج..."
+          style={{ padding: '10px', width: '300px', borderRadius: '20px', border: '1px solid #ddd' }}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </header>
-
-{/* لوحة التحكم المحمية */}
-      {!isManager ? (
-        <div style={{ textAlign: 'center', margin: '20px' }}>
+        
+        {/* زر دخول الإدارة */}
+        {!isManager && (
           <button 
             onClick={() => {
-              const pass = prompt("أدخل كود المدير:");
-              if (pass === "allaeth123") setIsManager(true);
-              else alert("كود خطأ!");
+              const p = prompt("أدخل كود المدير:");
+              if(p === "allaeth123") setIsManager(true);
             }}
-            style={{ padding: '10px 20px', cursor: 'pointer', backgroundColor: '#2980b9', color: 'white', border: 'none', borderRadius: '5px' }}
-          >
-            دخول لوحة الإدارة 🔐
-          </button>
-        </div>
-      ) : (
-        <div style={{ backgroundColor: '#fff', padding: '20px', margin: '20px auto', borderRadius: '15px', maxWidth: '800px' }}>
-          <h3 style={{ color: '#2980b9' }}>🛠️ إضافة بضاعة جديدة (لوحة المدير)</h3>
+            style={{ marginRight: '10px', cursor: 'pointer' }}
+          >🔐</button>
+        )}
+      </header>
+
+      {/* لوحة التحكم للمدير فقط */}
+      {isManager && (
+        <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '15px', marginBottom: '30px', border: '2px solid #2980b9' }}>
+          <h3>🛠️ لوحة تحكم المدير</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <input type="text" placeholder="اسم المنتج" value={newName} onChange={(e) => setNewName(e.target.value)} required />
             <input type="number" placeholder="السعر" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
             <input type="text" placeholder="رابط الصورة" value={newImage} onChange={(e) => setNewImage(e.target.value)} required />
-            <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>
-              أضف للمحل ✅
-            </button>
-            <button onClick={() => setIsManager(false)} style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px' }}>خروج</button>
+            <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>أضف المنتج</button>
+            <button onClick={() => setIsManager(false)} style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none', padding: '10px', borderRadius: '5px' }}>خروج</button>
           </form>
         </div>
       )}
 
-      <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
-        {/* عرض المنتجات */}
-        <div style={{ flex: 3, display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-          {filteredProducts.map(product => (
-            <div key={product.id} style={cardStyle}>
-              <img src={product.image || 'https://via.placeholder.com/150'} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-              <h3>{product.name}</h3>
-              <p style={{ color: '#27ae60', fontWeight: 'bold' }}>{product.price} ليرة</p>
-              <button onClick={() => addToCart(product)} style={btnStyle}>عبي بلسلة</button>
-            </div>
-          ))}
-        </div>
-
-        {/* السلة */}
-        <div style={{ flex: 1, backgroundColor: 'white', padding: '15px', borderRadius: '10px', height: 'fit-content' }}>
-          <h2>🛒 السلة ({cart.length})</h2>
-          {cart.map((item, index) => (
-            <div key={index} style={{ borderBottom: '1px solid #eee', padding: '5px 0', display: 'flex', justifyContent: 'space-between' }}>
-              <span>{item.name}</span>
-              <button onClick={() => removeFromCart(index)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>حذف</button>
-            </div>
-          ))}
-          <h3>الإجمالي: {totalPrice} ليرة</h3>
-        </div>
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {filteredProducts.map(product => (
+          <div key={product.id} style={{ backgroundColor: 'white', padding: '15px', borderRadius: '10px', width: '200px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+            <img src={product.image || 'https://via.placeholder.com/150'} alt={product.name} style={{ width: '100%', borderRadius: '10px' }} />
+            <h4>{product.name}</h4>
+            <p style={{ color: '#27ae60', fontWeight: 'bold' }}>{product.price} ليرة</p>
+            <button onClick={() => addToCart(product)} style={{ width: '100%', padding: '8px', backgroundColor: '#2980b9', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>أضف للسلة 🛒</button>
+            
+            {/* أزرار الإدارة تحت كل منتج */}
+            {isManager && (
+              <div style={{ marginTop: '10px', display: 'flex', gap: '5px' }}>
+                <button onClick={() => handleEditPrice(product.id)} style={{ flex: 1, fontSize: '12px', backgroundColor: '#f39c12', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>تعديل</button>
+                <button onClick={() => handleDelete(product.id)} style={{ flex: 1, fontSize: '12px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>حذف</button>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-
-// تنسيقات بسيطة
-const inputStyle = { padding: '10px', borderRadius: '5px', border: '1px solid #ddd', flex: '1' };
-const cardStyle = { backgroundColor: 'white', padding: '15px', borderRadius: '10px', width: '200px', textAlign: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' };
-const btnStyle = { backgroundColor: '#3498db', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', width: '100%' };
 
 export default App;
