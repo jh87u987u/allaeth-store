@@ -4,33 +4,44 @@ function Admin() {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [image, setImage] = useState('');
+    const [adminPassword, setAdminPassword] = useState(''); // حالة كلمة السر
+    const [isAdmin, setIsAdmin] = useState(false); // هل أنت المدير؟
+
+    const secretKey = "allaeth123"; // اغير هذا الكود السري الخاص بك
+
+    const checkAdmin = () => {
+        if (adminPassword === secretKey) {
+            setIsAdmin(true);
+        } else {
+            alert("كود خاطئ! أنت لست المدير.");
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const newProduct = { name, price: Number(price), image };
-
-        fetch('https://allaeth-store-1.onrender.com/api/products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newProduct)
-        })
-        .then(() => {
-            alert("تمت إضافة المنتج بنجاح يا وحش!");
-            setName(''); setPrice(''); setImage('');
-        });
+        // كود الـ fetch اللي كتبناه سابقاً يوضع هنا
     };
 
+    // إذا لم يتأكد النظام أنك المدير، أظهر له خانة الكود فقط
+    if (!isAdmin) {
+        return (
+            <div style={{ padding: '50px', textAlign: 'center' }}>
+                <h2>دخول الإدارة</h2>
+                <input 
+                    type="password" 
+                    placeholder="أدخل الكود السري" 
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                />
+                <button onClick={checkAdmin}>دخول</button>
+            </div>
+        );
+    }
+
+    // إذا كان المدير، تظهر له اللوحة الأصلية
     return (
         <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>إضافة منتج جديد للمحل 🛒</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '300px', margin: '0 auto' }}>
-                <input type="text" placeholder="اسم المنتج" value={name} onChange={(e) => setName(e.target.value)} required />
-                <input type="number" placeholder="السعر" value={price} onChange={(e) => setPrice(e.target.value)} required />
-                <input type="text" placeholder="رابط الصورة" value={image} onChange={(e) => setImage(e.target.value)} />
-                <button type="submit" style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px' }}>أضف المنتج</button>
-            </form>
+            <h2>لوحة تحكم المدير (إضافة بضاعة جديدة)</h2>
+            {/* كود الفورم الأصلي تبعك هنا */}
         </div>
     );
 }
-
-export default Admin;
