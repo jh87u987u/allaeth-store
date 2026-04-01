@@ -4,7 +4,11 @@ const cors = require('cors');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "https://allaeth-store-frontend.onrender.com", // رابط موقعك
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+}));
 
 // قائمة منتجات تجريبية نضعها في قاعدة البيانات أو نرسلها مباشرة
 const products = [
