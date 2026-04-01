@@ -13,7 +13,7 @@ function App() {
 
   // --- 2. جلب المنتجات عند تشغيل الصفحة ---
   useEffect(() => {
-    fetch('https://allaeth-store-1.onrender.com')
+    fetch('https://allaeth-store-1.onrender.com/api/products')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error("السيرفر مو شغال:", err));
