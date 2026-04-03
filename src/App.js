@@ -146,7 +146,7 @@ function App() {
               
               {/* زر الواتساب المطور */}
               <button 
-                onClick={() => window.open(`https://wa.me/9627XXXXXXXX?text=مرحباً، أرغب بطلب: ${product.name} بسعر ${product.price}`)}
+                onClick={() => window.open(`https://wa.me/963951432398?text=مرحباً، أرغب بطلب: ${product.name} بسعر ${product.price}`)}
                 style={{ ...btnStyle, backgroundColor: '#25D366', marginTop: '5px' }}
               >
                 طلب واتساب 💬
