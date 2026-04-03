@@ -61,7 +61,7 @@ function App() {
   };
 
   const handleEditPrice = (id) => {
-    const pPrice = prompt("أدخل السعر الجديد:");
+    const pPrice = prompt("أ السعر الجديد:");
     if (pPrice) {
       fetch(`${API_URL}/${id}`, {
         method: 'PUT',
